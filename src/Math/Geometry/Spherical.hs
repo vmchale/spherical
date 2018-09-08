@@ -124,8 +124,10 @@ relativeCompactness = (*scale) . compactness1
     where scale = 1/4*pi
 
 -- | Take the area of the polygon and divide by the perimeter squared. Dimensionless.
-compactness1 :: (Floating a) => [(a, a)] -> a
-compactness1 p = areaPolygon p/perimeterPolygon p^(2 :: Int)
+compactness1 :: (Floating a)
+             => [(a, a)] -- ^ Polygons on surface of the sphere, given in degrees
+             -> a
+compactness1 p = areaPolygon 1 p/(perimeterPolygon 1 p^(2 :: Int))
 
 -- | Compute the area of a convex polygon on the surface of a sphere.
 areaConvex :: (Floating a)
@@ -138,18 +140,27 @@ areaConvex _ _ = error "attempted to take area of polygon with < 3 points"
 
 -- | Uses areal projection; then finds area of the polygon.
 -- Result is in km^2
-areaPolygon :: Floating a => [(a, a)] -> a
-areaPolygon = (*factor) . areaPolyRectangular . fmap (bonne (radians 25) (snd washingtonDC) . toRadians)
-    where factor = 1717856/4.219690791828533e-2
+areaPolygon :: Floating a
+            => a -- ^ Radius of sphere
+            -> [(a, a)] -- ^ Polygon on the sphere, with points given in degrees.
+            -> a
+areaPolygon r = (*factor) . areaPolyRectangular . fmap (bonne (radians 25) (snd washingtonDC) . toRadians)
+    where factor = 1717856/4.219690791828533e-2 * ((r / 6371) ^ (2 :: Int))
 
 -- | Given a list of polygons, return the total perimeter.
-totalPerimeter :: (Floating a) => [[(a, a)]] -> a
-totalPerimeter = sum . fmap perimeterPolygon
+totalPerimeter :: (Floating a)
+               => a -- ^ Radius of sphere
+               -> [[(a, a)]] -- ^ List of polygons on the sphere, given in degrees
+               -> a
+totalPerimeter = sum .* (fmap . perimeterPolygon)
 
-perimeterPolygon :: Floating a => [(a, a)] -> a
-perimeterPolygon [x1, x2]       = distance x1 x2
-perimeterPolygon (x1:x2:points) = perimeterPolygon (x2:points) + distance x1 x2
-perimeterPolygon _              = error "Attempted to take perimeter of polygon with no points"
+perimeterPolygon :: Floating a
+                 => a -- ^ Radius of sphere
+                 -> [(a, a)] -- ^ Polygon on sphere given in degrees
+                 -> a
+perimeterPolygon r [x1, x2]       = distance r x1 x2
+perimeterPolygon r (x1:x2:points) = perimeterPolygon r (x2:points) + distance r x1 x2
+perimeterPolygon _ _              = error "Attempted to take perimeter of polygon with no points"
 
 -- | Find the area of a polygon with rectangular coördinates given. This
 -- function will throw an error when a polygon with no points is given.
@@ -159,8 +170,12 @@ areaPolyRectangular (pt:pts) = abs . (*0.5) . fst $ foldr areaPolyCalc (0,pt) pt
 areaPolyRectangular _ = error "Attempted to take area of polygon with no points"
 
 -- | Distance in kilometers between two points given in degrees.
-distance :: Floating a => (a, a) -> (a, a) -> a
-distance = (*6371) .* on centralAngle toRadians
+distance :: Floating a
+         => a -- ^ Radius of sphere
+         -> (a, a) -- ^ Point on sphere given in degrees
+         -> (a, a) -- ^ Point on sphere given in degrees
+         -> a
+distance r = (*r) .* on centralAngle toRadians
 
 -- | Compute central angle from points given in radians
 centralAngle :: Floating a => (a, a) -> (a, a) -> a
