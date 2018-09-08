@@ -20,7 +20,6 @@ module Math.Geometry.Spherical
     ) where
 
 import           Control.Composition
-import           Data.Foldable       (Foldable)
 
 -- | Convert a `a` from degrees to radians.
 radians :: Floating a => a -> a
@@ -98,7 +97,7 @@ albers referencePoint (long, lat) = (rho * sin theta, rho' - rho * cos theta)
 
 -- | Project a given polygon
 project :: (Floating a, Functor f) => ((a, a) -> (a, a)) -- ^ A projection
-                                   -> f (a, a) -- ^ A polygon defined by points on the sphere
+                                   -> f (a, a) -- ^ A polygon defined by points on the sphere, in degrees
                                    -> f (a, a)
 project f = fmap (f . toRadians)
 
@@ -144,7 +143,7 @@ areaPolygon = (*factor) . areaPolyRectangular . fmap (bonne (radians 25) (snd wa
     where factor = 1717856/4.219690791828533e-2
 
 -- | Given a list of polygons, return the total perimeter.
-totalPerimeter :: (Functor t, Foldable t, Floating a) => t [(a, a)] -> a
+totalPerimeter :: (Floating a) => [[(a, a)]] -> a
 totalPerimeter = sum . fmap perimeterPolygon
 
 perimeterPolygon :: Floating a => [(a, a)] -> a
