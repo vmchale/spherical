@@ -1,0 +1,40 @@
+name:                spherical
+version:             0.1.0.0
+synopsis:            Geometry on a sphere
+description:         Functions in pure Haskell for geometric computations on the surface of a sphere.
+license:             BSD3
+license-file:        LICENSE
+author:              Vanessa McHale
+maintainer:          vanessa.mchale@iohk.io
+copyright:           Copyright: (c) 2018 Vanessa McHale
+category:            Math
+build-type:          Simple
+extra-doc-files:     README.md
+                     CHANGELOG.md
+extra-source-files:  stack.yaml
+                   , cabal.project.local
+cabal-version:       1.18
+
+Flag development {
+  Description: Enable `-Werror`
+  manual: True
+  default: False
+}
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Math.Geometry.Spherical
+  build-depends:       base >= 4.3 && < 5
+                     , composition-prelude
+  default-language:    Haskell2010
+  if flag(development)
+    ghc-options:       -Werror
+  if impl(ghc >= 8.0)
+    ghc-options:       -Wincomplete-uni-patterns -Wincomplete-record-updates -Wredundant-constraints -Widentities
+  if impl(ghc >= 8.4)
+    ghc-options:       -Wmissing-export-lists
+  ghc-options:         -Wall
+
+source-repository head
+  type:     git
+  location: https://github.com/vmchale/spherical
