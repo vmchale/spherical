@@ -6,10 +6,11 @@ module Math.Geometry.Spherical
     , perimeterPolygon
     , littow
     , craig
-    , washingtonDC
-    , mecca
     , winkel3
     , mercator
+    -- * Reference points
+    , washingtonDC
+    , mecca
     -- * Computations
     , areaTriangle
     , compactness1
