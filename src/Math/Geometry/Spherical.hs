@@ -1,11 +1,8 @@
 {-# LANGUAGE RankNTypes #-}
 
 module Math.Geometry.Spherical
-    ( radians
-    , toRadians
-    , project
-    , areaTriangle
-    , albers
+    ( -- * Projections
+      albers
     , perimeterPolygon
     , littow
     , craig
@@ -13,15 +10,21 @@ module Math.Geometry.Spherical
     , mecca
     , winkel3
     , mercator
+    -- * Computations
+    , areaTriangle
     , compactness1
     , relativeCompactness
     , areaConvex
     , totalPerimeter
+    -- * Helper functions
+    , radians
+    , toRadians
+    , project
     ) where
 
 import           Control.Composition
 
--- | Convert a `a` from degrees to radians.
+-- | Convert from degrees to radians.
 radians :: Floating a => a -> a
 radians = (*(pi/180))
 

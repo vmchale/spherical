@@ -1,6 +1,2 @@
 constraints: spherical +development
-tests: True
-benchmarks: True
-documentation: True
-haddock-hoogle: True
-haddock-internal: True
+documentation: true
