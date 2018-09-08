@@ -1,9 +1,15 @@
 {-# LANGUAGE RankNTypes #-}
 
 module Math.Geometry.Spherical
-    ( -- * Projections
-      albers
+    ( -- * Computations
+      areaTriangle
+    , compactness
+    , relativeCompactness
+    , areaConvex
     , perimeterPolygon
+    , areaPolygon
+    -- * Projections
+    , albers
     , littow
     , craig
     , winkel3
@@ -11,12 +17,6 @@ module Math.Geometry.Spherical
     -- * Reference points
     , washingtonDC
     , mecca
-    -- * Computations
-    , areaTriangle
-    , compactness1
-    , relativeCompactness
-    , areaConvex
-    , totalPerimeter
     -- * Helper functions
     , radians
     , toRadians
@@ -86,7 +86,7 @@ bonne phi1 meridian (long, lat) = (rho * sin e, cot phi1 - rho * cos e)
 -- | Albers projection for a given reference point.
 --
 -- > ablers washingtonDC
-albers :: Floating a => (a, a) -- ^ A reference point no the sphere
+albers :: Floating a => (a, a) -- ^ A reference point on the sphere
                      -> ((a, a) -> (a, a))
 albers referencePoint (long, lat) = (rho * sin theta, rho' - rho * cos theta)
     where n = (sin phi1 + sin phi2) / 2
@@ -124,14 +124,14 @@ areaTriangle r x1 x2 x3 = r^(2 :: Int) * e
 
 -- | Relative compactness. Dimensionless.
 relativeCompactness :: (Floating a) => [(a, a)] -> a
-relativeCompactness = (*scale) . compactness1
+relativeCompactness = (*scale) . compactness
     where scale = 1/4*pi
 
 -- | Take the area of the polygon and divide by the perimeter squared. Dimensionless.
-compactness1 :: (Floating a)
+compactness :: (Floating a)
              => [(a, a)] -- ^ Polygons on surface of the sphere, given in degrees
              -> a
-compactness1 p = areaPolygon 1 p/(perimeterPolygon 1 p^(2 :: Int))
+compactness p = areaPolygon 1 p/(perimeterPolygon 1 p^(2 :: Int))
 
 -- | Compute the area of a convex polygon on the surface of a sphere.
 areaConvex :: (Floating a)
@@ -142,21 +142,14 @@ areaConvex r (base1:base2:pts) = fst $ foldr stepArea (0,base2) pts
     where stepArea point (sum', base) = (sum' + areaTriangle r base1 base point, point)
 areaConvex _ _ = error "attempted to take area of polygon with < 3 points"
 
--- | Uses areal projection; then finds area of the polygon.
--- Result is in km^2
+-- | Uses areal projection; then finds area of the polygon by the shoelace
+-- method.
 areaPolygon :: Floating a
             => a -- ^ Radius of sphere
             -> [(a, a)] -- ^ Polygon on the sphere, with points given in degrees.
             -> a
 areaPolygon r = (*factor) . areaPolyRectangular . fmap (bonne (radians 25) (snd washingtonDC) . toRadians)
     where factor = 1717856/4.219690791828533e-2 * ((r / 6371) ^ (2 :: Int))
-
--- | Given a list of polygons, return the total perimeter.
-totalPerimeter :: (Floating a)
-               => a -- ^ Radius of sphere
-               -> [[(a, a)]] -- ^ List of polygons on the sphere, given in degrees
-               -> a
-totalPerimeter = sum .* (fmap . perimeterPolygon)
 
 perimeterPolygon :: Floating a
                  => a -- ^ Radius of sphere
