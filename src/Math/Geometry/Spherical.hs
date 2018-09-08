@@ -9,7 +9,6 @@ module Math.Geometry.Spherical
     , perimeterPolygon
     , littow
     , craig
-    , avg
     , washingtonDC
     , mecca
     , winkel3
@@ -21,6 +20,7 @@ module Math.Geometry.Spherical
     ) where
 
 import           Control.Composition
+import           Data.Foldable       (Foldable)
 
 -- | Convert a `a` from degrees to radians.
 radians :: Floating a => a -> a
@@ -32,10 +32,6 @@ toRadians = both radians
 
 sinc :: Floating a => a -> a
 sinc x = sin x / x
-
--- | Average over a foldable container
-avg :: (RealFrac a, Foldable t) => t a -> a
-avg list = sum list / (fromIntegral . length $ list)
 
 -- | For use as a reference point
 washingtonDC :: (Floating a) => (a, a)
@@ -107,13 +103,13 @@ project :: (Floating a, Functor f) => ((a, a) -> (a, a)) -- ^ A projection
 project f = fmap (f . toRadians)
 
 -- | Compute the area of a triangle using L\'Huillier\'s formula
-areaTriangle :: Floating a => (a, a) -- ^ A point given in radians
+areaTriangle :: Floating a => a -- ^ Radius of the sphere
+                           -> (a, a) -- ^ A point given in radians
                            -> (a, a)
                            -> (a, a)
                            -> a
-areaTriangle x1 x2 x3 = r^(2 :: Int) * e
-    where r = 6371
-          e = 4 * atan(sqrt(tan(s/2) * tan((s - a)/2) * tan((s - b)/2) * tan((s - c)/2)))
+areaTriangle r x1 x2 x3 = r^(2 :: Int) * e
+    where e = 4 * atan(sqrt(tan(s/2) * tan((s - a)/2) * tan((s - b)/2) * tan((s - c)/2)))
           s = (a + b + c) / 2
           a = distanceRad x1 x2
           b = distanceRad x1 x3
@@ -133,10 +129,13 @@ compactness1 :: (Floating a) => [(a, a)] -> a
 compactness1 p = areaPolygon p/perimeterPolygon p^(2 :: Int)
 
 -- | Compute the area of a convex polygon on the surface of a sphere.
-areaConvex :: (Floating a) => [(a, a)] -> a
-areaConvex (base1:base2:pts) = fst $ foldr stepArea (0,base2) pts
-    where stepArea point (sum', base) = (sum' + areaTriangle base1 base point, point)
-areaConvex _ = error "attempted to take area of polygon with < 3 points"
+areaConvex :: (Floating a)
+           => a -- ^ Radius of a sphere
+           -> [(a, a)] -- ^ Polygon on the surface of the sphere
+           -> a
+areaConvex r (base1:base2:pts) = fst $ foldr stepArea (0,base2) pts
+    where stepArea point (sum', base) = (sum' + areaTriangle r base1 base point, point)
+areaConvex _ _ = error "attempted to take area of polygon with < 3 points"
 
 -- | Uses areal projection; then finds area of the polygon.
 -- Result is in km^2
@@ -151,10 +150,10 @@ totalPerimeter = sum . fmap perimeterPolygon
 perimeterPolygon :: Floating a => [(a, a)] -> a
 perimeterPolygon [x1, x2]       = distance x1 x2
 perimeterPolygon (x1:x2:points) = perimeterPolygon (x2:points) + distance x1 x2
-perimeterPolygon _              = error "Attempted to take area of polygon with no points"
+perimeterPolygon _              = error "Attempted to take perimeter of polygon with no points"
 
 -- | Find the area of a polygon with rectangular coördinates given. This
--- function will error if given a polygon with no points.
+-- function will throw an error when a polygon with no points is given.
 areaPolyRectangular :: (Floating a) => [(a, a)] -> a
 areaPolyRectangular (pt:pts) = abs . (*0.5) . fst $ foldr areaPolyCalc (0,pt) pts
     where areaPolyCalc (x2, y2) (sum',(x1,y1)) = (sum' + (x1 * y2 - x2 * y1),(x2,y2))
