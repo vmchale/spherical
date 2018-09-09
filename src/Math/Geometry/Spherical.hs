@@ -36,7 +36,7 @@ toRadians :: Floating a => (a, a) -> (a, a)
 toRadians = both radians
 
 sinc :: Floating a => a -> a
-since 0 = 1
+sinc 0 = 1
 sinc x = sin x / x
 
 -- | For use as a reference point
