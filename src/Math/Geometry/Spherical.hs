@@ -35,7 +35,7 @@ radians = (*(pi/180))
 toRadians :: Floating a => (a, a) -> (a, a)
 toRadians = both radians
 
-sinc :: Floating a => a -> a
+sinc :: (Eq a, Floating a) => a -> a
 sinc 0 = 1
 sinc x = sin x / x
 
@@ -63,7 +63,7 @@ craig referencePoint (long, lat) = (long - referenceLong, y)
             | otherwise = (long - referenceLong) / sin (long - referenceLong) * expr
 
 -- | Winkel Tripel projection
-winkel3 :: Floating a => (a, a) -> (a, a)
+winkel3 :: (Eq a, Floating a) => (a, a) -> (a, a)
 winkel3 (long, lat) = ((lambda * cos phi1 + (2 * cos lat * sin (lambda/2)/sinc alpha))/2, (lat + sin lat/sinc alpha)/2)
     where lambda = long - lambda0
           phi1 = acos $ 2 / pi
