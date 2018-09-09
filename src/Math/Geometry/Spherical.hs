@@ -8,12 +8,14 @@ module Math.Geometry.Spherical
     , areaConvex
     , perimeterPolygon
     , areaPolygon
+    , distance
     -- * Projections
     , albers
     , littow
     , craig
     , winkel3
     , mercator
+    , bonne
     -- * Reference points
     , washingtonDC
     , mecca
@@ -34,6 +36,7 @@ toRadians :: Floating a => (a, a) -> (a, a)
 toRadians = both radians
 
 sinc :: Floating a => a -> a
+since 0 = 1
 sinc x = sin x / x
 
 -- | For use as a reference point
