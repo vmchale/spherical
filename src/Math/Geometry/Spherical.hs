@@ -147,6 +147,9 @@ areaConvex _ _ = error "attempted to take area of polygon with < 3 points"
 
 -- | Uses areal projection; then finds area of the polygon by the shoelace
 -- method.
+--
+-- This is morally dubious in that it uses the Bonne projection centered around
+-- DC, so it will blow up in some cases.
 areaPolygon :: Floating a
             => a -- ^ Radius of sphere
             -> [(a, a)] -- ^ Polygon on the sphere, with points given in degrees.

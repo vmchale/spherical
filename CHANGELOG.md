@@ -1,5 +1,9 @@
 # spherical
 
+## 0.1.2.2
+
+  * Documentation improvements
+
 ## 0.1.2.1
 
   * Fix `sinc`
