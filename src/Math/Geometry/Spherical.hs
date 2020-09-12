@@ -158,19 +158,29 @@ areaConvex r (base1:base2:pts) = fst $ foldr stepArea (0,base2) pts
     where stepArea point (sum', base) = (sum' + areaTriangle r base1 base point, point)
 areaConvex _ _ = error "attempted to take area of polygon with < 3 points"
 
--- | Uses areal projection; then finds area of the polygon by the shoelace
--- method.
---
--- This is morally dubious in that it uses the Bonne projection centered around
+-- | This is morally dubious in that it uses the Bonne projection centered around
 -- DC, so it will blow up in some cases.
 areaPolygon :: Floating a
             => a -- ^ Radius of sphere
             -> [(a, a)] -- ^ Polygon on the sphere, with points given in degrees.
             -> a
-areaPolygon r = (*factor) . areaPolyRectangular . fmap (bonne (radians 25) (snd washingtonDC) . toRadians)
+areaPolygon r = areaPolygonGeneral r (snd washingtonDC)
+
+
+-- | Uses areal projection; then finds area of the polygon by the shoelace
+-- method.
+--
+-- This is morally dubious in that it uses the Bonne projection so it will blow
+-- up in some cases.
+--
+-- @since 0.1.3.0
+areaPolygonGeneral :: Floating a
+                    => a -- ^ Radius of sphere
+                    -> a -- ^ Central meridian
+                    -> [(a, a)] -- ^ Polygon on the sphere, with points given in degrees.
+                    -> a
+areaPolygonGeneral r meridian = (*factor) . areaPolyRectangular . fmap (bonne (radians 25) meridian . toRadians)
     where factor = 1717856/4.219690791828533e-2 * ((r / 6371) ^ (2 :: Int))
-    -- FIXME: center at centroid of polygon?
-    -- suggested: lambert azimuthal equiareal projection
 
 perimeterPolygon :: Floating a
                  => a -- ^ Radius of sphere
