@@ -16,6 +16,7 @@ module Math.Geometry.Spherical
     , winkel3
     , mercator
     , bonne
+    , lambertAzimuthal
     -- * Reference points
     , washingtonDC
     , mecca
@@ -85,6 +86,18 @@ bonne phi1 meridian (long, lat) = (rho * sin e, cot phi1 - rho * cos e)
     where rho = cot phi1 + phi1 - lat
           e = (long - meridian) * cos lat / rho
           cot = (1/) . tan
+
+-- | See
+-- [here](https://mathworld.wolfram.com/LambertAzimuthalEqual-AreaProjection.html).
+--
+-- @since 0.1.3.0
+lambertAzimuthal :: Floating a
+                 => a -- ^ Standard parallel
+                 -> a -- ^ Central longitude
+                 -> (a, a)
+                 -> (a, a)
+lambertAzimuthal phi1 lambda0 (long, lat) = (k' * cos lat * sin (long - lambda0), k' * cos phi1 * sin lat - sin phi1 * cos lat * cos (long - lambda0)) -- lambda corresponds to long, phi to lat on mathworld
+    where k' = sqrt (2 / (1 + sin phi1 * sin lat + cos phi1 * cos lat * cos (long - lambda0)))
 
 -- | Albers projection for a given reference point.
 --
@@ -156,6 +169,8 @@ areaPolygon :: Floating a
             -> a
 areaPolygon r = (*factor) . areaPolyRectangular . fmap (bonne (radians 25) (snd washingtonDC) . toRadians)
     where factor = 1717856/4.219690791828533e-2 * ((r / 6371) ^ (2 :: Int))
+    -- FIXME: center at centroid of polygon?
+    -- suggested: lambert azimuthal equiareal projection
 
 perimeterPolygon :: Floating a
                  => a -- ^ Radius of sphere

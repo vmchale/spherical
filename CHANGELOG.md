@@ -1,5 +1,9 @@
 # spherical
 
+## 0.1.3.0
+
+  * Add Lambert azimuthal projection
+
 ## 0.1.2.2
 
   * Documentation improvements
